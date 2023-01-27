@@ -1,4 +1,4 @@
-name: daps-final
+name: sns-final
 
 dependencies:
   - python=3.7
