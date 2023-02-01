@@ -5,6 +5,10 @@ dependencies:
   - pip
   - pip:
     - numpy
+    - requests
+    - pandas
+    - jupyter
+    - jupyterlab
 
  
     
