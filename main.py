@@ -50,7 +50,43 @@ prc.get_scatter_plot(df,'Precipitation','Precipitation in mm/hour','scatter_prec
 prc.get_scatter_plot(df,'Pressure','Pressure in kPa','scatter_pres')
 prc.get_scatter_plot(df,'Wind Speed','Wind Speed in m/s','scatter_wind')
 
-bad_data_loc = np.where(df < -500)
-print(bad_data_loc)
 
+bad_sensor_val_loc = df[df < -500].dropna()
+
+df_updated = df[~(df < -500).any(axis=1)]
+
+print(bad_sensor_val_loc)
+print (df)
+print(df_updated)
 print(df.index)
+
+df_updated = df_updated.resample('H').interpolate()
+print(df_updated.shape)
+
+# plot and compare them
+
+
+prc.compare_graph(df.index,df['Temperature'],bad_sensor_val_loc.index,bad_sensor_val_loc['Temperature'],df_updated.index,df_updated['Temperature'],'Date Time','Temperature','Comparison Plot','comp_temp')
+prc.compare_graph(df.index,df['Humidity'],bad_sensor_val_loc.index,bad_sensor_val_loc['Humidity'],df_updated.index,df_updated['Humidity'],'Date Time','Humidity','Comparison Plot','comp_hum')
+prc.compare_graph(df.index,df['Precipitation'],bad_sensor_val_loc.index,bad_sensor_val_loc['Precipitation'],df_updated.index,df_updated['Precipitation'],'Date Time','Precipitation','Comparison Plot','comp_prec')
+prc.compare_graph(df.index,df['Pressure'],bad_sensor_val_loc.index,bad_sensor_val_loc['Pressure'],df_updated.index,df_updated['Pressure'],'Date Time','Pressure','Comparison Plot','comp_pres')
+prc.compare_graph(df.index,df['Wind Speed'],bad_sensor_val_loc.index,bad_sensor_val_loc['Wind Speed'],df_updated.index,df_updated['Wind Speed'],'Date Time','Wind Speed','Comparison Plot','comp_ws')
+plt.close()
+plt.clf()
+#boxplot for new dataset
+
+prc.get_boxplot(df_updated['Temperature'],"Temperature in Celsius", "box_plot_temp_new")
+prc.get_boxplot(df_updated['Humidity'],"Relative Humidity", "box_plot_hum_new")
+prc.get_boxplot(df_updated['Precipitation'],"Precipitation in mm/hour", "box_plot_precip_new")
+prc.get_boxplot(df_updated['Pressure'],"Pressure in kPa", "box_plot_pressure_new")
+prc.get_boxplot(df_updated['Wind Speed'],"Wind Speed in m/s", "box_plot_wind_new")
+
+#new scatter plots
+
+prc.get_scatter_plot(df_updated,'Temperature','Temperture in Celsius','scatter_temp_new')
+prc.get_scatter_plot(df_updated,'Humidity','Relative Humidity','scatter_hum_new')
+prc.get_scatter_plot(df_updated,'Precipitation','Precipitation in mm/hour','scatter_prec_new')
+prc.get_scatter_plot(df_updated,'Pressure','Pressure in kPa','scatter_pres_new')
+prc.get_scatter_plot(df_updated,'Wind Speed','Wind Speed in m/s','scatter_wind_new')
+
+#next step check for other oultier and cap/give new value
