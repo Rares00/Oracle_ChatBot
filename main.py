@@ -5,6 +5,7 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import stats
 
 CSV_URL = "https://power.larc.nasa.gov/api/temporal/hourly/point?Time=LST&parameters=T2M,RH2M,PRECTOTCORR,PS,WS50M&community=RE&longitude=-0.1677&latitude=51.4627&start=20180101&end=20230101&format=CSV"
 CSV_FILE = "weather_data.csv"
@@ -90,3 +91,10 @@ prc.get_scatter_plot(df_updated,'Pressure','Pressure in kPa','scatter_pres_new')
 prc.get_scatter_plot(df_updated,'Wind Speed','Wind Speed in m/s','scatter_wind_new')
 
 #next step check for other oultier and cap/give new value
+
+#deal with the other outliers
+
+#most of the data seems clean at this point. The only one that can still have outliers would be the precipitaion
+
+print(df.nlargest(50,'Precipitation'))
+
