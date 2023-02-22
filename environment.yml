@@ -15,6 +15,7 @@ dependencies:
     - sklearn
     - tensorflow
     - keras
+    - scikit-learn
     
 
  
