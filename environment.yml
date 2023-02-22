@@ -12,9 +12,10 @@ dependencies:
     - requests
     - seaborn
     - scipy
+    - sklearn
     - tensorflow
     - keras
-    - sklearn
+    
 
  
     
