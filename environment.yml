@@ -12,6 +12,8 @@ dependencies:
     - requests
     - seaborn
     - scipy
+    - tensorflow
+    - keras
 
  
     

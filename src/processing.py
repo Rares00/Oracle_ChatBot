@@ -41,3 +41,16 @@ def compare_graph(x_data1,y_data1,x_data2,y_data2,x_data3,y_data3, x_label, y_la
     plt.xticks(rotation=30)
     plt.savefig(path)
 #Source module taken from a different project I did, Rares Nitu
+
+def data_filter_ml(df, start, end, collumns):
+    """
+    This function is used to filter the data in the context of using it for a prediction model
+    in our context we do not need it because the data is already pre-procesed but considering
+    we want the program to be as flexible as possible we used this function in case other datasets 
+    are goinng to be used
+
+    This function takes the complete dataset and filter it by datetime index with a start date an end date
+    and the wanted collumns.
+    """
+    filter_data = df.loc[(df.index >= start) & (df.index <= end), collumns]
+    return filter_data

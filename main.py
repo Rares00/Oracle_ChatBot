@@ -98,3 +98,8 @@ prc.get_scatter_plot(df_updated,'Wind Speed','Wind Speed in m/s','scatter_wind_n
 
 print(df.nlargest(50,'Precipitation'))
 
+#filter the data for the model:
+filter_data = prc.data_filter_ml(df, "2018-01-01","2023-01-01",
+                                  ["Temperature", "Humidity", "Precipitation", "Pressure", "Wind Speed"])
+
+print(filter_data)
