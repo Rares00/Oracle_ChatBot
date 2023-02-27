@@ -2,10 +2,11 @@ from datetime import datetime
 from datetime import timedelta
 import pandas as pd
 
-
+##读取当前时间
 def get_date(days):
     now_date = datetime.now()
     return (now_date - timedelta(days=days+180)).strftime('%Y-%m-%d')
+##加180是没有当前数据
 
 
 def weather(text):
@@ -14,6 +15,7 @@ def weather(text):
         'yesterday': 1,
         'today': 0,
         'tomorrow': -1
+
     }
     # max([v if k in text else -999 for k,v in enumerate(key)])
     cl1 = max([v if k in text else -999 for k, v in key.items()])
@@ -21,18 +23,18 @@ def weather(text):
 
     Q = {
         'weather': 1,
-        'Temperature': 0,
-        'Humidity': -1,
-        'Precipitation': -2,
-        'Wind Speed': -3,
+        'temperature': 0,
+        'humidity': -1,
+        'precipitation': -2,
+        'wind speed': -3,
 
     }
     headers = {
         'weather': '',
-        'Temperature': 'T2M',
-        'Humidity': 'RH2M',
-        'Precipitation': 'PRECTOTCORR',
-        'Wind Speed': 'WS50M',
+        'temperature': 'T2M',
+        'humidity': 'RH2M',
+        'precipitation': 'PRECTOTCORR',
+        'wind speed': 'WS50M',
 
     }
     cl2 = max([v if k in text else -999 for k, v in Q.items()])
@@ -59,5 +61,11 @@ def weather(text):
     print(A)
 
 
-Q = '''What's the Temperature like tomorrow'''
-weather(Q)
+Q = '''What's the Temperature like '''
+while True:
+    Q=input().lower()
+    try:
+        weather(Q)
+    except Exception:
+        print('re-input')
+
