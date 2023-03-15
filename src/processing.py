@@ -50,7 +50,7 @@ def data_filter_ml(df, start, end, collumns):
     are goinng to be used
 
     This function takes the complete dataset and filter it by datetime index with a start date an end date
-    and the wanted collumns.
+    and the wanted columns.
     """
     filter_data = df.loc[(df.index >= start) & (df.index <= end), collumns]
     return filter_data
