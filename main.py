@@ -5,7 +5,15 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import stats
+from scipy import stats, optimize
+from keras.optimizers.optimizer_experimental import optimizer
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import TimeSeriesSplit
+import torch
+from torch import nn, optim
+import pickle
+
 
 CSV_URL = "https://power.larc.nasa.gov/api/temporal/hourly/point?Time=LST&parameters=T2M,RH2M,PRECTOTCORR,PS,WS50M&community=RE&longitude=-0.1677&latitude=51.4627&start=20180101&end=20230101&format=CSV"
 CSV_FILE = "weather_data.csv"
@@ -103,3 +111,110 @@ filter_data = prc.data_filter_ml(df_updated, "2018-01-01","2023-01-01",
                                   ["Temperature", "Humidity", "Precipitation", "Pressure", "Wind Speed"])
 
 print(filter_data)
+
+################## inference ####
+df = filter_data.copy()
+
+# load the scaler object from the file
+with open('scaler.pkl', 'rb') as f:
+    scaler = pickle.load(f)
+with open('scaler_temp.pkl', 'rb') as f:
+    scaler_temp = pickle.load(f)
+with open('scaler_precip.pkl', 'rb') as f:
+    scaler_precip = pickle.load(f)
+
+# extract the last 336 data points from df
+data = df.iloc[-337:-1, :]  # df = m.filter_data
+
+# normalize the input data using the pre-trained scaler
+scaled_data = scaler.transform(data)
+
+# reshape the data to match the input shape of the model
+input_data = scaled_data.reshape(1, 1, 336, 5)
+
+# convert the input data to a PyTorch tensor and send it to the CPU
+input_tensor = torch.Tensor(input_data).cpu()
+
+# set seed for reproducibility
+seed = 88
+torch.manual_seed(seed)
+torch.cuda.manual_seed(seed)
+np.random.seed(seed)
+
+# Define CNN model
+class Alex(nn.Module):
+  def __init__(self, output_size):
+    super(Alex, self).__init__()
+    self.output = output_size
+
+    self.layer1 = nn.Sequential(nn.Conv2d(in_channels=1, out_channels=32, kernel_size=7,stride=1,padding=3),
+                                nn.ReLU(True),)
+    
+    self.layer2 = nn.MaxPool2d(kernel_size=2)
+
+    self.layer3 = nn.Sequential(nn.Conv2d(in_channels=32, out_channels=64, kernel_size=7,stride=1,padding=3),
+                                nn.ReLU(True),)
+    
+    self.layer4 = nn.MaxPool2d(kernel_size=2)
+
+    self.layer5 = nn.Sequential(nn.Conv2d(in_channels=64, out_channels=128, kernel_size=7,stride=1,padding=3),
+                                nn.ReLU(True),)
+    
+    self.layer6 = nn.Sequential(nn.Linear(128*84*1, 256),
+                                nn.Linear(256,168))
+
+  def forward(self, input):
+    repre = self.layer1(input)
+    repre = self.layer2(repre)
+    repre = self.layer3(repre) 
+    repre = self.layer4(repre)
+    repre = self.layer5(repre)
+    repre = self.layer6(repre.view(repre.size(0), -1))
+    return repre
+
+output_size = 24 * 7 # predict 7 days of hourly data
+model = Alex(output_size)
+# load the saved model from the file
+model.load_state_dict(torch.load('model_temp.pth', map_location=torch.device('cpu')))
+
+# make predictions using the loaded model and the input data
+with torch.no_grad():
+    predictions = model(input_tensor).cpu().numpy()
+
+# convert the predictions back to the original scale
+forecast_temp = scaler_temp.inverse_transform(predictions.reshape(-1, 1))
+
+# load the saved model from the file
+model.load_state_dict(torch.load('model_precip.pth', map_location=torch.device('cpu')))
+
+# make predictions using the loaded model and the input data
+with torch.no_grad():
+    predictions = model(input_tensor).cpu().numpy()
+
+# convert the predictions back to the original scale
+forecast_precip = scaler_precip.inverse_transform(predictions.reshape(-1, 1))
+
+# create a datetime index starting from 2023-01-01 00:00:00 with hourly frequency
+index = pd.date_range(start='2023-01-01 00:00:00', periods=168, freq='H')
+
+# create a dataframe with the forecast values and the datetime index
+df_forecast = pd.DataFrame({'Temperature': forecast_temp.flatten(), 'Precipitation': forecast_precip.flatten()}, index=index)
+df_forecast['Precipitation'] = df_forecast['Precipitation'].clip(lower=0)
+
+# plot the forecast values
+fig, axs = plt.subplots(2, 1, figsize=(10, 8))
+
+# plot forecast_temp in the first subplot
+axs[0].plot(df_forecast.index, df_forecast['Temperature'], color='blue')
+axs[0].set_title('Temperature Forecast')
+
+# plot forecast_precip in the second subplot
+axs[1].plot(df_forecast.index, df_forecast['Precipitation'], color='green')
+axs[1].set_title('Precipitation Forecast')
+
+# set shared x-axis label and adjust spacing between subplots
+fig.tight_layout(pad=3.0)
+plt.xlabel('Date')
+plt.show()
+
+df_forecast.to_csv('df_forecast.csv')
