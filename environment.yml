@@ -17,6 +17,7 @@ dependencies:
     - keras
     - scikit-learn
     - pydot
+    - torch
     
 
  

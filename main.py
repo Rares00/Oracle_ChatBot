@@ -39,10 +39,12 @@ df = df.drop(columns=['YEAR','MO','DY','HR'])
 df = df.rename(columns={'T2M':'Temperature','RH2M':'Humidity','PRECTOTCORR':'Precipitation','PS':'Pressure','WS50M':'Wind Speed'})
 print(df)
 
+#check for missing values
 print(df.isnull().sum())
 
 #outliers
-#visual
+#visualion
+
 prc.get_boxplot(df['Temperature'],"Temperature in Celsius", "box_plot_temp")
 prc.get_boxplot(df['Humidity'],"Relative Humidity", "box_plot_hum")
 prc.get_boxplot(df['Precipitation'],"Precipitation in mm/hour", "box_plot_precip")
@@ -73,6 +75,7 @@ df_updated = df_updated.resample('H').interpolate()
 print(df_updated.shape)
 
 # plot and compare them
+
 
 
 prc.compare_graph(df.index,df['Temperature'],bad_sensor_val_loc.index,bad_sensor_val_loc['Temperature'],df_updated.index,df_updated['Temperature'],'Date Time','Temperature','Comparison Plot','comp_temp')
