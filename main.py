@@ -118,11 +118,11 @@ print(filter_data)
 df = filter_data.copy()
 
 # load the scaler object from the file
-with open('scaler.pkl', 'rb') as f:
+with open('./pickle_files/scaler.pkl', 'rb') as f:
     scaler = pickle.load(f)
-with open('scaler_temp.pkl', 'rb') as f:
+with open('./pickle_files/scaler_temp.pkl', 'rb') as f:
     scaler_temp = pickle.load(f)
-with open('scaler_precip.pkl', 'rb') as f:
+with open('./pickle_files/scaler_precip.pkl', 'rb') as f:
     scaler_precip = pickle.load(f)
 
 # extract the last 336 data points from df
