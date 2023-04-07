@@ -6,7 +6,6 @@ import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats, optimize
-from keras.optimizers.optimizer_experimental import optimizer
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import TimeSeriesSplit
@@ -178,7 +177,7 @@ class Alex(nn.Module):
 output_size = 24 * 7 # predict 7 days of hourly data
 model = Alex(output_size)
 # load the saved model from the file
-model.load_state_dict(torch.load('model_temp.pth', map_location=torch.device('cpu')))
+model.load_state_dict(torch.load('./pickle_files/model_temp.pth', map_location=torch.device('cpu')))
 
 # make predictions using the loaded model and the input data
 with torch.no_grad():
@@ -188,7 +187,7 @@ with torch.no_grad():
 forecast_temp = scaler_temp.inverse_transform(predictions.reshape(-1, 1))
 
 # load the saved model from the file
-model.load_state_dict(torch.load('model_precip.pth', map_location=torch.device('cpu')))
+model.load_state_dict(torch.load('./pickle_files/model_precip.pth', map_location=torch.device('cpu')))
 
 # make predictions using the loaded model and the input data
 with torch.no_grad():
